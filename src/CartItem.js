@@ -1,8 +1,19 @@
 import React from 'react';
 
 // class component
-class CartItem extends React.Component{
-    render(){
+class CartItem extends React.Component
+{
+    render()
+    {
+        // console.log("this.props : ", this.props);
+        const {title, price, qty} = this.props.product;
+        const {
+                product, 
+                onDecreaseQuantity, 
+                onIncreaseQuantity, 
+                onDeleteProduct
+            } = this.props;
+
         return(
             <div className="cart-item">
 
@@ -12,15 +23,30 @@ class CartItem extends React.Component{
                 </div>
 
                 <div className="right-block">
-                    <div style={style.font}>Phone</div>
-                    <div>Rs. 999</div>
-                    <div>Qty: 1</div>
+                    <div style={style.font}>{title}</div>
+                    <div style={style.fontColor}>Rs. {price}</div>
+                    <div id="item-qty" style={style.fontColor}>Qty: {qty}</div>
 
                     <div className="cart-item-actions">
                         {/* buttons */}
-                        <button>+</button>
-                        <button>-</button>
-                        <button>X</button>
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/128/992/992651.png" 
+                            alt="increase" 
+                            className="action-icons" 
+                            onClick={()=> onIncreaseQuantity(product)} 
+                        />
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/128/992/992683.png" 
+                            alt="decrease" 
+                            className="action-icons" 
+                            onClick={()=> onDecreaseQuantity(product)} 
+                        />
+                        <img 
+                            src="https://cdn-icons-png.flaticon.com/128/6861/6861362.png" 
+                            alt="delete" 
+                            className="action-icons"
+                            onClick={()=> onDeleteProduct(product.id)}  
+                        />
                     </div>
                 </div>
             </div>
@@ -39,7 +65,12 @@ const style = {
     },
     font:
     {
-        fontSize:25
+        fontSize:25,
+    },
+    fontColor:
+    {
+        color: "#777"
     }
+     
 }
 export default CartItem;

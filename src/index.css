@@ -5,10 +5,15 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #414141;
-  color: white;
+  /* background-color: #414141;
+  color: white; */
 }
 
+.cart
+{
+  display: flex;
+  flex-direction: column;
+}
 .cart-item
 {
   display: inline-flex;
