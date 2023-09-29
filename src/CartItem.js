@@ -4,7 +4,7 @@ import React from 'react';
 const CartItem = (props)=>
 {
     // console.log("this.props : ", this.props);
-    const {title, price, qty} = props.product;
+    const {title, price, qty, img} = props.product;
     const {
             product, 
             onDecreaseQuantity, 
@@ -17,7 +17,7 @@ const CartItem = (props)=>
 
             <div className="left-block">
                 {/* item images */}
-                <img src="" style={style.Image} />
+                <img src={img} alt="img" style={style.Image} />
             </div>
 
             <div className="right-block">
