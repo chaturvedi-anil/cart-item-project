@@ -3,7 +3,7 @@ import './App.css';
 import Cart from './Cart';
 import Navbar from './Navbar';
 import {app} from './index';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
 
 
 class App extends React.Component 
@@ -16,15 +16,15 @@ class App extends React.Component
       products:[],
       // loading:true
     }
+    this.db=getFirestore(app);
+    this.productsCol =collection(this.db, 'products');
   }
 
   // componetdidMount
 
-  async componentDidMount()
+  componentDidMount()
   {
-    const db=getFirestore(app);
-    const productsCol = await collection(db, 'products');
-    const unsubscribe=onSnapshot(productsCol, (snapshot)=>
+    const unsubscribe=onSnapshot(this.productsCol, (snapshot)=>
     {
       // it will return array of products
       const productList = snapshot.docs.map((doc) =>
@@ -38,6 +38,7 @@ class App extends React.Component
       this.setState(
       {
         products:productList,
+        unsubscribe
         // loading:false
       });
     })
@@ -54,31 +55,50 @@ class App extends React.Component
   increaseQuantity =(product)=>
   {
       const {products} = this.state;
-      const index = products.indexOf(product);
+      // Get the index of the product to update
+      const index = products.findIndex((item) => item.id === product.id);
+      if (index === -1) {
+        console.error('Product not found in the state');
+        return;
+      }
+      let productToUpdate = products[index];
 
-      products[index].qty += 1;
-
-      this.setState({
-          products:products
+      let docRef = doc(this.productsCol, productToUpdate.id);
+      
+      updateDoc(docRef, {qty: productToUpdate.qty + 1})
+      .then(()=>
+      {
+        console.log("qty updated");
+      })
+      .catch((err)=>
+      {
+        console.log('error in updating qty : ', err);
       })
   }
 
   //decrease qunatity
   decreaseQuantity = (product)=>
   {
-      const {products} = this.state;
-      const index = products.indexOf(product);
-      
-      if(products[index].qty === 0)
-      {
-          return;
-      }
+    const {products} = this.state;
+    // Get the index of the product to update
+    const index = products.findIndex((item) => item.id === product.id);
+    if (index === -1) {
+      console.error('Product not found in the state');
+      return;
+    }
+    let productToUpdate = products[index];
 
-      products[index].qty -= 1;
-
-      this.setState({
-          products:products
-      })
+    let docRef = doc(this.productsCol, productToUpdate.id);
+    
+    updateDoc(docRef, {qty: productToUpdate.qty - 1})
+    .then(()=>
+    {
+      console.log("qty updated");
+    })
+    .catch((err)=>
+    {
+      console.log('error in updating qty : ', err);
+    })
   }
   // delete product
 
@@ -119,12 +139,33 @@ class App extends React.Component
     })
     return cartTotal;
   }
+
+  // add product in firebase
+  addProduct=  ()=>
+  {
+    addDoc(this.productsCol, {
+      title: 'fan',
+      qty: 2,
+      price: 4000,
+      img: ''
+    })
+    .then((docRef)=>
+    {
+      console.log(`new product added : ${docRef}`);
+    })
+    .catch((err)=>
+    {
+      console.log("err : ",err);
+    })
+  }
+
   render()
   {
     const {products} = this.state;
     return (
       <div className="App">
         <Navbar count={this.getCartCount()}/>
+        {/* <button onClick={this.addProduct} style={{padding: 20, fontSize:25}}>Add Product</button> */}
         <Cart 
           products={products}
           onIncreaseQuantity={this.increaseQuantity}
