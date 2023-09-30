@@ -2,6 +2,9 @@ import React from 'react';
 import './App.css';
 import Cart from './Cart';
 import Navbar from './Navbar';
+import {app} from './index';
+import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+
 
 class App extends React.Component 
 {
@@ -10,33 +13,43 @@ class App extends React.Component
     super();
     this.state = 
     {
-      products:
-      [
-        {
-            id: 1,
-            title: "Mobile Phone",
-            price: 999,
-            qty: 1,
-            img: 'https://images.unsplash.com/photo-1589492477829-5e65395b66cc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fG1vYmlsZSUyMHBob25lfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-        },
-        {
-            id: 2,
-            title: "Laptop",
-            price: 99900,
-            qty: 5,
-            img: 'https://images.unsplash.com/photo-1575024357670-2b5164f470c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGxhcHRvcHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60'
-        },
-        {
-            id: 3,
-            title: "jeans",
-            price: 999,
-            qty: 26,
-            img: 'https://images.unsplash.com/photo-1605518216938-7c31b7b14ad0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG1lbnMlMjBqZWFuc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60'
-        }
-      ]
+      products:[],
+      // loading:true
     }
   }
 
+  // componetdidMount
+
+  async componentDidMount()
+  {
+    const db=getFirestore(app);
+    const productsCol = await collection(db, 'products');
+    const unsubscribe=onSnapshot(productsCol, (snapshot)=>
+    {
+      // it will return array of products
+      const productList = snapshot.docs.map((doc) =>
+      {
+        const data=doc.data();
+        data['id']= doc.id;
+        
+        return data;
+      });
+      
+      this.setState(
+      {
+        products:productList,
+        // loading:false
+      });
+    })
+  }
+  componentWillUnmount() 
+  {
+    // Unsubscribe from the Firestore listener to prevent memory leaks
+    if (this.state.unsubscribe) 
+    {
+      this.state.unsubscribe();
+    }
+  }
   // increase quantity
   increaseQuantity =(product)=>
   {
@@ -118,8 +131,8 @@ class App extends React.Component
           onDecreaseQuantity={this.decreaseQuantity}
           onDeleteProduct = {this.deleteProduct}
         />
-
-        <div>Total : {this.getCartTotal()}</div>
+        {/* {loading && <h1>Loading Products...</h1> } */}
+        <div style={{fontSize:30, padding:10}}>Total : {this.getCartTotal()}</div>
       </div>
     );
   }
