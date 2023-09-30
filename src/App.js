@@ -3,7 +3,7 @@ import './App.css';
 import Cart from './Cart';
 import Navbar from './Navbar';
 import {app} from './index';
-import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 
 class App extends React.Component 
@@ -100,18 +100,22 @@ class App extends React.Component
       console.log('error in updating qty : ', err);
     })
   }
-  // delete product
 
+  // delete product
   deleteProduct = (id)=>
   {
-      const {products} = this.state;
-      
-      // filter will return all products except that id product
-      const items = products.filter((item)=> item.id !== id);
+    const {products} = this.state;
+    let docRef = doc(this.productsCol, id);
 
-      this.setState({
-          products: items
-      })
+    deleteDoc(docRef)
+    .then(()=>
+    {
+      console.log("product deleted");
+    })
+    .catch((err)=>
+    {
+      console.log('error in deleting product : ', err);
+    })
   }
 
   getCartCount = ()=>
